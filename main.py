@@ -19,7 +19,6 @@ class GameState(Enum):
 
 
 RESTORE_PATH = "neat-checkpoint-99"
-BLIND = False
 CAPTION = "GAME"
 SCREEN_SIZE = (1200, 800)
 RADIUS = 100
