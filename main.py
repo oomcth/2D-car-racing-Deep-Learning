@@ -30,7 +30,7 @@ class Game():
                  unit_test=False):
 
         self.GAMESTATE = Gamestate
-        self.BLIND = BLIND
+        self.BLIND = False
         self.track = Track()
         self.generation = 0
         self.max_generation = max_generation
