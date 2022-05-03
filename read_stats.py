@@ -1,6 +1,7 @@
 import pickle
 import matplotlib.pyplot as plt
 
+# charge les statistiques d'entrainement et les affiche
 with open("stats.pkl", "rb") as f:
     stats = pickle.load(f)
 
