@@ -1,5 +1,6 @@
 import main
 
+# lance un test unitaire avec les paramètres rentées par l'utilisateur
 
 maxg = int(input("max generation : "))
 f = float(input("desired fitness : "))

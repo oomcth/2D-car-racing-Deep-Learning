@@ -3,9 +3,12 @@ import pygame as pg
 from math import cos, sin, pi
 import numpy as np
 
+# objet qui gère l'affichage et la position du joueur
+
 
 class Player_Rect:
     def __init__(self, x, y, w, h, t) -> None:
+        # (x, y) renvoient le centre du rectangle
         self.x = x
         self.y = y
         self.w = w
@@ -14,9 +17,11 @@ class Player_Rect:
         self.color = pg.Color("red")
         self.sight_reach = 1000.
 
+    # renvoie le centre du rectangle
     def pos(self):
         return numpy.array([self.x, self.y])
 
+    # renvoie les coins du rectangle
     def corners(self):
 
         v1 = numpy.array([cos(self.t), sin(self.t)])
@@ -29,6 +34,8 @@ class Player_Rect:
                 self.pos() - v1 + v2,
                 self.pos() - v1 - v2,
                 self.pos() + v1 - v2]
+
+    # lignes utilisées pour calculer les inputs de l'IA
 
     def l1(self):
         return np.array([[self.x, self.y],
@@ -57,6 +64,8 @@ class Player_Rect:
 
     def Draw(self, surface):
         pg.draw.polygon(surface, self.color, self.corners())
+
+# objet qui gère la position et l'affichage des bords du circuit
 
 
 class Line:

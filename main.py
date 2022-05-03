@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import pygame as pg
 
 
+# gère les différents modes de jeu disponibles
+
 class GameState(Enum):
     playing = 0
     training = 1
@@ -18,25 +20,32 @@ class GameState(Enum):
     race = 4
 
 
+# variables globales
+
 RESTORE_PATH = "neat-checkpoint-99"
 CAPTION = "GAME"
 SCREEN_SIZE = (1200, 800)
 RADIUS = 100
 
 
+# classe principale du code
+
 class Game():
 
     def __init__(self, Gamestate, max_generation=-1,
                  unit_test=False):
 
+        # stock le mode de jeu en cour
         self.GAMESTATE = Gamestate
+        # si Blind alors il n'y aura pas d'affichage
         self.BLIND = False
         self.track = Track()
-        self.generation = 0
-        self.max_generation = max_generation
+        # retourne True si l'on est entrain de faire un test unitaire
         self.unit_test = unit_test
 
         if not unit_test:
+
+            # initie pygame
             os.environ["SDL_VIDEO_CENTERED"] = '1'
             pg.init()
             self.screen = pg.display.set_mode(SCREEN_SIZE)
@@ -45,18 +54,26 @@ class Game():
             self.fps = 60.0
             self.keys = pg.key.get_pressed()
 
+            # chaine de if/elif pour faire les initialisations correspondantes
+            # au mode de jeu
             if(self.GAMESTATE == GameState.playing):
+
+                # crée un objet joueur
                 self.player = Player(170., 200., 50., 20., 1., 100.)
+                # ajoute la gestion des entrées du joueur
                 self.player.add(Ctl.Player_Controller(self.player))
+                # ne donne pas de limite de temps de jeu au joueur
                 self.player.max = -1
 
             elif(self.GAMESTATE == GameState.training):
 
+                # la config stocke des données sur la méthode d'entrainement
                 config = neat.Config(neat.DefaultGenome,
                                      neat.DefaultReproduction,
                                      neat.DefaultSpeciesSet,
                                      neat.DefaultStagnation, "./config.txt")
 
+                # crée la population et des outils pour analyser l'entrainement
                 population = neat.Population(config)
                 population.add_reporter(neat.StdOutReporter(True))
                 stats = neat.StatisticsReporter()
@@ -65,9 +82,11 @@ class Game():
 
                 winner = population.run(self.run_car, 50)
 
+                # stock le meilleur génome en mémoire
                 with open("winner2.pkl", "wb") as f:
                     pickle.dump(winner, f)
 
+                # stock les données sur l'entrainement
                 with open("stats.pkl", "wb") as f:
                     pickle.dump(stats, f)
 
@@ -101,19 +120,27 @@ class Game():
 
             elif(self.GAMESTATE == GameState.spectating or
                  self.GAMESTATE == GameState.race):
+
+                # charge l'IA et crée un objet joueur correspondant
                 with open("winner.pkl", "rb") as f:
                     genome = pickle.load(f)
                     genomes = [(1, genome)]
+
+                    # si on est en mode course, ajoute un joueur humain
                     if(self.GAMESTATE == GameState.race):
                         self.player = Player(170., 200., 50., 20., 1., 100.)
                         self.player.add(Ctl.Player_Controller(self.player))
                         self.player.max = -1
+
+                    # lance le jeu
                     self.run_car(genomes, neat.Config(neat.DefaultGenome,
                                                       neat.DefaultReproduction,
                                                       neat.DefaultSpeciesSet,
                                                       neat.DefaultStagnation,
                                                       "./config.txt"))
+        # code lancé pour le test unitaire
         else:
+
             self.GAMESTATE = GameState.training
             self.BLIND = True
             self.result = -1
@@ -127,6 +154,7 @@ class Game():
             population = neat.Population(config)
             population.run(self.run_car, max_generation)
 
+    # gère les inputs du joueur
     def event_loop(self):
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
@@ -148,15 +176,18 @@ class Game():
                 if event.key == pg.K_9:
                     self = Game(GameState.training)
 
+    # mise à jour des paramètres
     def Update(self):
         self.player.Update()
-        self.track.update(self.player)
+        self.track.update(self.player, False)
 
+    # Affiche les objets
     def Draw(self, surface):
         surface.fill(pg.Color("black"))
         self.player.Draw(surface)
         self.track.draw(surface)
 
+    # boucle principale du mode jeu solo, met à jour et affiche les composants
     def main_loop(self):
         if(self.GAMESTATE == GameState.playing):
             while True:
@@ -174,10 +205,12 @@ class Game():
         self = Game(GameState.playing)
         self.main_loop()
 
+    # fonction principales des autres modes de jeu
     def run_car(self, genomes, config):
         nets = []
         cars = []
 
+        # empêche l'IA de faire des demis tours
         def player_zone_check(player):
             (x, y) = (player.x, player.y)
             if(x < 200 and x > 100 and y > 100 and y < 200):
@@ -203,6 +236,7 @@ class Game():
                     return False
             return False
 
+        # initie les IA
         for id, g in genomes:
             net = neat.nn.FeedForwardNetwork.create(g, config)
             nets.append(net)
@@ -214,15 +248,16 @@ class Game():
                self.GAMESTATE == GameState.race):
                 cars[len(cars)-1].max = -1
 
-        self.generation += 1
-
+        # boucle principale, met à jour et affiche les composants
         while(True):
             if(self.GAMESTATE == GameState.race):
                 self.player.Update()
-                self.track.update(self.player)
+                self.track.update(self.player, False)
                 if not self.player.alive:
                     self = Game(GameState.race)
 
+            # va chercher les outputs du réseau de neuronne et contrôlle l'IA
+            # en conséquence
             for index, car in enumerate(cars):
                 outputs = nets[index].activate(car.inputs())
                 car.Update(outputs)
@@ -230,6 +265,7 @@ class Game():
 
             remain_cars = 0
 
+            # calcul le fitness des IA
             for i, car in enumerate(cars):
                 if(car.alive):
                     remain_cars += 1
@@ -242,6 +278,7 @@ class Game():
             if not self.unit_test:
                 self.event_loop()
 
+            # si l'affichage est activé, dessine les objets
             if not self.BLIND:
                 self.screen.fill(pg.Color("black"))
 

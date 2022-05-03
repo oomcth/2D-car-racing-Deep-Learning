@@ -2,6 +2,8 @@ import math
 from numba import njit
 import numpy as np
 
+# différentes fonctions mathématiques utiles pour la gestion des collisions
+
 
 @njit('boolean(float64[:],float64[:],float64[:])')
 def on_segment(p, q, r):
