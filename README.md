@@ -1,6 +1,6 @@
 # projet-python-ENSAE
 
-Fait par Mathis SCHEFFLER et Baptiste FERRERE.
+Fait par Mathis SCHEFFLER.
 
 Veuillez lire rapport.pdf pour comprendre le code.
 
