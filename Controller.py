@@ -3,9 +3,8 @@ from math import cos, sin
 
 dt = 1/60
 
+
 # classe mère, gère la mise à jour de la position
-
-
 class Controller:
 
     def __init__(self, player) -> None:
@@ -29,9 +28,9 @@ class Controller:
     def decelerate(self):
         self.player.s = max(0, self.player.s - dt * 5 * self.acceration)
 
+
+
 # classe fille, modifie la vitesse en fonction des entrées du joueur
-
-
 class Player_Controller(Controller):
 
     def __init__(self, player) -> None:
@@ -50,9 +49,9 @@ class Player_Controller(Controller):
             super().L_turn()
         super().Update()
 
+
+
 # classe fille, modifie la vitesse en fonction des inputs de l'IA
-
-
 class IA_Controller(Controller):
 
     def __init__(self, player) -> None:
