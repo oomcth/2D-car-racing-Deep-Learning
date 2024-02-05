@@ -29,18 +29,14 @@ def intersects(seg1, seg2):
     p2, q2 = seg2
 
     o1 = orientation(p1, q1, p2)
-
     o2 = orientation(p1, q1, q2)
     o3 = orientation(p2, q2, p1)
     o4 = orientation(p2, q2, q1)
 
     if o1 != o2 and o3 != o4:
-
         return True
-
     if o1 == 0 and on_segment(p1, q1, p2):
         return True
-
     if o2 == 0 and on_segment(p1, q1, q2):
         return True
     if o3 == 0 and on_segment(p2, q2, p1):
